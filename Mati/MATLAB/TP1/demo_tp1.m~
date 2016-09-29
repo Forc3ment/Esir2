@@ -1,0 +1,14 @@
+clear; close all; clc;
+
+dx = 0.05; %pas spatial de discrétisation
+dt1 = 0.00127; %pas temporel de discrétisation
+dt = 0.001; %pas temporel de discrétisation
+r = dt/(dx*dx);
+x=-1:dx:1;
+u0=sin(x*5)+x; %signal 1D de test
+figure; plot(x,u0,'-+'); %affichage du signal
+
+diffusion1D(u0,1000,dt,dx);
+
+diffusion1D(u0,1000,dt1,dx);
+

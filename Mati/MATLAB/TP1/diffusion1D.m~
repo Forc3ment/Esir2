@@ -1,0 +1,7 @@
+
+function u_n = diffusion1D(u, n, dt, dx)
+    r = dt/(dx*dx);
+    u_gauche = [u(2:end) u(end)]
+    u_droite = [u(1) u(1:end-1)]
+    
+    for i = 1:n:1
