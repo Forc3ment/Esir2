@@ -1,0 +1,38 @@
+# CMake generated Testfile for 
+# Source directory: /home/force/Programmation/ESIR2/Soft/VISP/visp/modules
+# Build directory: /home/force/Programmation/ESIR2/Soft/VISP/visp-build/modules
+# 
+# This file includes the relevant testing commands required for 
+# testing this directory and lists subdirectories to be tested as well.
+subdirs(ar/.ar)
+subdirs(core/.core)
+subdirs(detection/.detection)
+subdirs(gui/.gui)
+subdirs(io/.io)
+subdirs(robot/.robot)
+subdirs(sensor/.sensor)
+subdirs(blob/.blob)
+subdirs(klt/.klt)
+subdirs(mbt/.mbt)
+subdirs(me/.me)
+subdirs(tt/.tt)
+subdirs(tt_mi/.tt_mi)
+subdirs(vision/.vision)
+subdirs(visual_features/.visual_features)
+subdirs(vs/.vs)
+subdirs(core)
+subdirs(detection)
+subdirs(gui)
+subdirs(io)
+subdirs(klt)
+subdirs(me)
+subdirs(sensor)
+subdirs(ar)
+subdirs(blob)
+subdirs(robot)
+subdirs(visual_features)
+subdirs(vs)
+subdirs(vision)
+subdirs(mbt)
+subdirs(tt)
+subdirs(tt_mi)

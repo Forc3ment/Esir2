@@ -1,0 +1,67 @@
+                    ViSP third-party libraries
+
+Below you will find the list of third party libraries used to 
+build ViSP on your computer.
+
+Mathematics:
+  Gnu Scientific Library      : no
+  Lapack/blas                 : no
+Simulator:
+  Ogre simulator              : no
+  \- Ogre3D                   : no
+  \- OIS                      : no
+  Coin simulator              : no
+  \- Coin3D                   : no
+  \- SoWin                    : no
+  \- SoXt                     : no
+  \- SoQt                     : no
+  \- Qt4                      : no
+  \- Qt3                      : no
+Robots
+  Afma6                       : no
+  Afma4                       : no
+  Biclops                     : no
+  Ptu46                       : no
+  Pioneer                     : no
+  Viper S650                  : no
+  Viper S850                  : no
+  Virtuose haptic device      : no
+Video devices (display)
+  X11                         : yes
+  GTK                         : no
+  OpenCV                      : yes 
+  GDI                         : no
+  Direct3D                    : no
+Cameras
+  Firewire libdc1394-2.x      : yes
+  Video For Linux Two         : no
+  DirectShow                  : no
+  CMU 1394 Digital Camera SDK : no
+  OpenCV                      : yes
+  PointGrey Flycapture        : no
+RGB-D sensors
+  RealSense                   : no
+  \-pcl                       : no
+  Kinect                      : 
+  \-libfreenect               : no
+  \-libusb-1.0                : no
+  \-pthread                   : yes
+Force/Torque sensors
+  \-atidaq                    : no
+  \-comedi                    : no
+Frameworks
+  Yarp                        : no
+Video and image Read/Write:
+  FFMPEG                      : no
+  libjpeg                     : yes
+  libpng                      : yes
+Misc:
+  XML2                        : no
+  pthread                     : yes
+  OpenMP                      : yes
+  zbar                        : no
+  dmtx                        : no
+Documentation:
+  Doxygen                     : no
+ViSP built with C++11 features: no
+
