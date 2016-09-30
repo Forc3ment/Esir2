@@ -81,8 +81,14 @@ void afficheImage(vpImage<vpRGBa> img, int posX, int posY, const char *title)
 /* max est la valeur maximum de l'histogramme (le mode principal), utilisee pour l'affichage de l'histogramme*/
 void histogramme(const vpImage<unsigned char>  &I, unsigned int* histo, int &max)
 {
-	unsigned int i = I.getWidth();
-	unsigned int j = I.getHeight();
+	unsigned int i = I.getHeight();
+	unsigned int j = I.getWidth();
+
+	for(int i=0; i<256; i++)
+    {
+    	*(histo+i)=0;
+    }
+
 	max = 0;
 	for(int k=0; k<i; k++)
 	{
@@ -90,7 +96,7 @@ void histogramme(const vpImage<unsigned char>  &I, unsigned int* histo, int &max
 		{
 			unsigned int toto = I[k][l];
 			(*(histo+toto))++;
-			if((*(histo+toto))>max)max = (int) (histo+I[k][l]);
+			if((*(histo+toto))>max)max = *(histo+I[k][l]);
 		}
 	}
 }
@@ -98,7 +104,7 @@ void histogramme(const vpImage<unsigned char>  &I, unsigned int* histo, int &max
 
 void histocumule(unsigned int* histo, unsigned int* histocumul)
 {
-	histocumul=histo;
+	*histocumul=*histo;
     for(int i=1; i<256; i++)
     {
     	*(histocumul+i)=*(histo+i)+(*(histocumul+(i-1)));
@@ -120,18 +126,17 @@ void stat(unsigned int *histo,
     for(int i=1; i<256; i++)
     {
     	moyenne+=i*(*(histo+i));
-    	if(histo+i!=0 && min>i) min=i;
-    	if(histo+i!=0 && max<i) max=i;
+    	if(*(histo+i)!=0 && min>i) min=i;
+    	if(*(histo+i)!=0 && max<i) max=i;
     }
     moyenne=moyenne/(h*w);
     int a = 0;
     for(int i=1; i<256; i++)
     {
-    	a=i*(*(histo+i)) - moyenne*(*(histo+i));
-    	ecart_type+=a * a;
+	    a+= *(histo+i) * ((i-moyenne) * (i-moyenne));
     }
 
-    ecart_type = sqrt( ecart_type/(h*w) );
+    ecart_type = sqrt( a/(h*w) );
 }
 
 
@@ -141,7 +146,7 @@ int nbNDGOccupe (const unsigned int *histo)
  	int ndgo = 0;
  	for(int i=1; i<256; i++)
     {
-    	if(histo+i!=0) ndgo++;
+    	if(*(histo+i)!=0) ndgo++;
     }
     return ndgo;
 }
@@ -154,10 +159,7 @@ void display_stat(const vpImage<unsigned char>  &I0, const unsigned int h,const 
 {
 
 	unsigned int *histo = new unsigned int[256];
-	for(int i=0; i<256; i++)
-    {
-    	*(histo+i)=0;
-    }
+	
     int maxx = 0;
 	double moyenne = 0;
 	double ecart_type = 0;
@@ -170,8 +172,9 @@ void display_stat(const vpImage<unsigned char>  &I0, const unsigned int h,const 
 
 	cout<<"moyenne : "<<moyenne<<", ecart type : "<<ecart_type<<", max : "<< (int)max << ", min : "<< (int)min <<", dynamique : "<< (max-min) <<", ndgo : "<< nbNDGOccupe(histo) << endl;
 
-	tracer_histo(histo, max, 256, 0, 0);
-	delete(histo);
+	tracer_histo(histo, maxx, 256, 300, 100);
+
+	delete []histo;
 	
 }
 
@@ -182,14 +185,14 @@ void anamorphose1(const vpImage<unsigned char>  &I0, const float pente)
 
 	vpImage<unsigned char> I1 (heigth, width);
 
-	for(int i=0; i<width; i++)
+	for(int i=0; i<heigth; i++)
 	{
-		for(int j=0; j<heigth; j++)
+		for(int j=0; j<width; j++)
 		{
 			I1[i][j]=I0[i][j]*pente;
 		}
 	}
-	vpDisplayX d1(I1,100,100) ;
+	vpDisplayX d1(I1,300,100) ;
         vpDisplay::setTitle(I1, "Première anamorphose");
         vpDisplay::display(I1);
         vpDisplay::flush(I1) ;
@@ -206,9 +209,9 @@ void anamorphose2(const vpImage<unsigned char>  &I0, const unsigned int seuil)
 
 	unsigned int pente = 255/seuil;
 
-	for(int i=0; i<width; i++)
+	for(int i=0; i<heigth; i++)
 	{
-		for(int j=0; j<heigth; j++)
+		for(int j=0; j<width; j++)
 		{
 			if(I0[i][j]>seuil)
 				I1[i][j]=255;
@@ -216,7 +219,7 @@ void anamorphose2(const vpImage<unsigned char>  &I0, const unsigned int seuil)
 				I1[i][j]=I0[i][j]*pente;
 		}
 	}
-	vpDisplayX d1(I1,100,100) ;
+	vpDisplayX d1(I1,300,100) ;
         vpDisplay::setTitle(I1, "Seconde anamorphose");
         vpDisplay::display(I1);
         vpDisplay::flush(I1);
@@ -226,8 +229,41 @@ void anamorphose2(const vpImage<unsigned char>  &I0, const unsigned int seuil)
 
 void egalisation(const vpImage<unsigned char>  &I)
 {
-	
-	
+	int max = 0;
+	unsigned int *histo = new unsigned int[256];
+	unsigned int *histocumul = new unsigned int[256];
+
+	int heigth = I.getHeight();
+	int width = I.getWidth();
+
+	vpImage<unsigned char> I1 (heigth, width);
+
+	int gmax = 255;
+	int n = heigth*width;
+
+	histogramme(I,histo,max);
+	histocumule(histo,histocumul);
+
+	for(int i=0; i<heigth; i++)
+	{
+		for(int j=0; j<width; j++)
+		{
+			float pixel = (float)(*(histocumul+I[i][j]))/(float)n;
+			I1[i][j]= (int)(pixel * gmax);
+		}
+	}
+
+	vpDisplayX d1(I1,300,100) ;
+		vpDisplay::setTitle(I1, "Resultat de l'égalisation");
+	    vpDisplay::display(I1);
+	    vpDisplay::flush(I1);
+
+	    tracer_histo(histocumul,histocumul[255],256,100,400);
+
+	    vpDisplay::getClick(I1);
+
+    delete [] histo;
+    delete [] histocumul;
 }
 
 
