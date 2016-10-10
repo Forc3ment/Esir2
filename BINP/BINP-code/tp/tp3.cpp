@@ -170,9 +170,9 @@ void display_stat(const vpImage<unsigned char>  &I0, const unsigned int h,const 
 
 	stat(histo, I0.getHeight(), I0.getWidth(), moyenne, ecart_type, min, max);
 
-	cout<<"moyenne : "<<moyenne<<", ecart type : "<<ecart_type<<", max : "<< (int)max << ", min : "<< (int)min <<", dynamique : "<< (max-min) <<", ndgo : "<< nbNDGOccupe(histo) << endl;
+	cout<<"\n Moyenne : "<<moyenne<<", Ecart type : "<<ecart_type<<", Max : "<< (int)max << ", Min : "<< (int)min <<", Dynamique : "<< (max-min) <<", ndgo : "<< nbNDGOccupe(histo) << endl;
 
-	tracer_histo(histo, maxx, 256, 300, 100);
+	tracer_histo(histo, maxx, 256, posX, posY);
 
 	delete []histo;
 	
@@ -258,7 +258,9 @@ void egalisation(const vpImage<unsigned char>  &I)
 	    vpDisplay::display(I1);
 	    vpDisplay::flush(I1);
 
-	    tracer_histo(histocumul,histocumul[255],256,100,400);
+	    display_stat(I, I.getHeight(), I.getWidth(), 500, 100);
+
+	    tracer_histo(histocumul,histocumul[255],256,500,300);
 
 	    vpDisplay::getClick(I1);
 
@@ -270,14 +272,51 @@ void egalisation(const vpImage<unsigned char>  &I)
 /* calcul l'EQM entre l'image originale I et l'image après quantification Iq*/
 double EQM (const vpImage<unsigned char>  &I, const vpImage<unsigned char>  &Iq){
     
-    return 0;
+    int heigth = I.getHeight();
+	int width = I.getWidth();
+	int EQM =0;
+
+    for(int i=0; i<heigth; i++)
+	{
+		for(int j=0; j<width; j++)
+		{
+			int a = Iq[i][j] - I[i][j];
+			EQM += a*a;
+		}
+	}
+    return EQM/(heigth*width);
 }
 
 
 void quantification_uniforme(const vpImage<unsigned char>  &I, int nbbits)
 {
+    int heigth = I.getHeight();
+	int width = I.getWidth();
+	int ndq = pow(2,nbbits);     	//Nombre de niveau de quantification
+	int q = 256/ndq;						//pas de quantification
 
-    
+	vpImage<unsigned char> I1 (heigth, width);
+
+    for(int i=0; i<heigth; i++)
+	{
+		for(int j=0; j<width; j++)
+		{
+			for(int t=0; t<256; t+=q)
+			{
+				if(I[i][j]>=t && I[i][j]<t+q)
+				{
+					I1[i][j] = t + q/2;
+				}
+			}
+		}
+	}
+
+	vpDisplayX d1(I1,300,100) ;
+        vpDisplay::setTitle(I1, "Quantification uniforme");
+        vpDisplay::display(I1);
+        vpDisplay::flush(I1);
+        vpDisplay::getClick(I1);
+
 }
 
 
@@ -323,7 +362,7 @@ int main(int argc, char **argv)
 				vpDisplay::flush(I0) ;
 				cout << "\n Valeurs image initiale : " << endl;
 
-				display_stat(I0, I0.getHeight(), I0.getWidth(), 100, 500);
+				display_stat(I0, I0.getHeight(), I0.getWidth(), 300, 100);
 				
 				vpDisplay::getClick(I0);
 				vpDisplay::close(I0) ;
@@ -352,7 +391,7 @@ int main(int argc, char **argv)
 				d0.init(I0);
 				vpDisplay::display(I0);
 				vpDisplay::flush(I0) ;	
-				
+				display_stat(I0, I0.getHeight(), I0.getWidth(), 100, 500);
 				// Egalisation
 				egalisation(I0);
 				
