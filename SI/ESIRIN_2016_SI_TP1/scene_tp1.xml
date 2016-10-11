@@ -5,12 +5,14 @@
 		<XMATSHADER file="shaders/texDiffProg.xml" nbtex="1" nblight="1">texDiffProg</XMATSHADER>
 		<XMATSHADER file="shaders/texPhongProg.xml" nbtex="1" nblight="1">texPhongProg</XMATSHADER>
 		<XMATSHADER file="shaders/texCartoonProg.xml" nbtex="1" nblight="1">texCartoonProg</XMATSHADER>
+		<XMATSHADER file="shaders/texMetalProg.xml" nbtex="1" nblight="1">texMetalProg</XMATSHADER>
 		<XMATSHADER file="shaders/texProg.xml" nbtex="1" nblight="0">textProg</XMATSHADER>
 	</SHADERS>
 	<TEXTURES>		
 		<TEXTURE id="rouge" type="color">texture/rouge.png</TEXTURE>	
 		<TEXTURE id="bleue" type="color">texture/bleue.png</TEXTURE>	
 		<TEXTURE id="vert" type="color">texture/vert.png</TEXTURE>	
+		<TEXTURE id="metal" type="color">texture/metalbrossee.png</TEXTURE>	
 		<TEXTURE id="skyTex" type="color">texture/skybox.png</TEXTURE>	
 	</TEXTURES>
 	<SHAPES>
@@ -25,6 +27,10 @@
 		<SHAPE id="sphereBleue" type="sphere">
 			<GEOMETRY id="sphere" uv="10.0,10.0">5.0,32.0,32.0</GEOMETRY>
 			<TEXTID>bleue</TEXTID>
+		</SHAPE>
+		<SHAPE id="sphereMetal" type="sphere">
+			<GEOMETRY id="sphere" uv="10.0,10.0">5.0,32.0,32.0</GEOMETRY>
+			<TEXTID>metal</TEXTID>
 		</SHAPE>		
 	</SHAPES>	
 	<ROOT id="root" skybox="skyTex" skysize="800.0" skyshader="textProg" camera="walk">
@@ -35,7 +41,7 @@
 				<OBJECT3D id="sphereVert02" shader="texDiffProg">sphereVert</OBJECT3D>
 		</TRANSFORM>	
 		<TRANSFORM id="transform_sphere03" translate="0.0,0.0,-40.0" rotaxis="0.0,1.0,0.0" angle="0.0">
-				<OBJECT3D id="sphereBleue03" shader="texDiffProg">sphereBleue</OBJECT3D>
+				<OBJECT3D id="sphereMetal03" shader="texMetalProg">sphereMetal</OBJECT3D>
 		</TRANSFORM>	
 		<TRANSFORM id="transform_sphere04" translate="0.0,20.0,-40.0" rotaxis="0.0,1.0,0.0" angle="0.0">
 				<OBJECT3D id="sphereBleue04" shader="texCartoonProg">sphereBleue</OBJECT3D>
