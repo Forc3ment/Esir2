@@ -212,6 +212,7 @@ vpImage< unsigned char >  ouverture(vpImage< unsigned char > &I, const vpImage< 
 {
     vpImage< unsigned char >Io;
     
+    Io = dilatation(erosion(I,es),es);
     
     return Io;
     
@@ -223,6 +224,7 @@ vpImage< unsigned char >  fermeture(vpImage< unsigned char > &I, const vpImage< 
 {
     vpImage< unsigned char >If;
     
+    If = erosion(dilatation(I,es),es);
     
     return If;
     
@@ -407,16 +409,26 @@ int main(int argc, char **argv)
     
     vpImage<unsigned char> Idilate=dilatation(I0,ES);
     afficheImage(Idilate,100,500,"Image dilatee") ;
-    //vpImageIo::write(Idilate,"./resultat/image_dilatee.pgm");
+    vpImageIo::write(Idilate,"../resultat/image_dilatee.pgm");
 
     vpImage<unsigned char> Ierode=erosion(I0,ES);
-    afficheImage(Ierode,100,900,"Image erodee") ;
-    //vpImageIo::write(Ierode,"./resultat/image_erodee.pgm");
+    afficheImage(Ierode,100,500,"Image erodee") ;
+    vpImageIo::write(Ierode,"../resultat/image_erodee.pgm");
     
+    vpImage<unsigned char> Iopen=ouverture(I0,ES);
+    afficheImage(Iopen,100,500,"Image ouverte") ;
+    vpImageIo::write(Iopen,"../resultat/image_ouverte.pgm");
+
+    vpImage<unsigned char> Iclose=fermeture(I0,ES);
+    afficheImage(Iclose,100,500,"Image fermee") ;
+    vpImageIo::write(Iclose,"../resultat/image_fermee.pgm");
     
     // Desallocation
     I0.destroy();
     Idilate.destroy();
+    Ierode.destroy();
+    Iopen.destroy();
+    Iclose.destroy();
     ES.destroy();
     
 	cout << "Fin du programme " << endl ;

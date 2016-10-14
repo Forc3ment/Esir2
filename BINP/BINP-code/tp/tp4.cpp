@@ -192,14 +192,47 @@ void filtrage2D_separable(const vpImage< unsigned char > &I, vpImage< double > &
    	tIf2->destroy();
 }
 
-
-
-void filtre_median(const vpImage< unsigned char > &I, vpImage< unsigned char  > &If, int size)
+double convolution_median(const vpImage< unsigned char > &I, int i, int j, int size)
 {
-    
+    int rows = size;
+    int cols = size;
+    int heigth = I.getHeight();
+    int width = I.getCols();
+
+    vector<unsigned char>  toto (size*size,0); 
+    int n = 0;
+
+    for(int k = -rows/2; k<=rows/2; k++)
+    {
+        for(int l = -cols/2; l<=cols/2; l++)
+        {
+            if(i+k<0 || i+k>=heigth || j+l<0 || j+l>=width)
+                toto[n]=0;
+            else    
+                toto[n]=I[i+k][j+l];
+            n++;
+        }
+    }
+
+    sort(toto.begin(),toto.end());
+
+    return toto[((size*size)/2)+1];
     
 }
 
+void filtre_median(const vpImage< unsigned char > &I, vpImage< unsigned char  > &If, int size)
+{
+    int heigth = I.getHeight();
+    int width = I.getCols();
+
+    for(int i = 0; i<heigth; i++)
+    {
+        for(int j = 0; j<width; j++)
+        {
+            If[i][j] = convolution_median(I,i,j,size);
+        }
+    }
+}
 
 int main(int argc, char **argv)
 {
@@ -248,8 +281,7 @@ int main(int argc, char **argv)
     
     
     //filtrage2D_separable(I0,Ic,F2,F3);
-    filtrage2D(I0,Ic,Ksy);
-
+    //filtrage2D(I0,Ic,Ksy);
 
     // for(int i = 0; i<height; i++) //Pour filtre sans négatif
     // {
@@ -259,8 +291,9 @@ int main(int argc, char **argv)
     // 	}
     // }
 
-    vpImageConvert::convert(Ic,If);
+    //vpImageConvert::convert(Ic,If); //pour filtre dérivatif
 
+    filtre_median(I0,If,3);
 
    	//affiche(Ic);
 
