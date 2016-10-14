@@ -239,7 +239,8 @@ int main(int argc, char **argv)
     vpMatrix F2(1,3,1);F2[0][0]=1.0/16;F2[0][1]=2.0/16;F2[0][2]=1.0/16;
     vpMatrix F3(1,3,1);F3[0][0]=1;F3[0][1]=2;F3[0][2]=1;
     vpMatrix Ka(5,5,1); // Filtre moyenneur
-    vpMatrix Ks(3,3); // Sobel kernel
+    vpMatrix Ksx(3,3,0); Ksx[0][0]=-1.0/4; Ksx[1][0]=-2.0/4; Ksx[2][0]=-1.0/4; Ksx[0][2]=1.0/4; Ksx[1][2]=2.0/4; Ksx[2][2]=1.0/4;// Sobel kernel X
+    vpMatrix Ksy(3,3,0); Ksy[2][2]=-1.0/4; Ksy[2][1]=-2.0/4; Ksy[2][0]=-1.0/4; Ksy[0][0]=1.0/4; Ksy[0][1]=2.0/4; Ksy[0][2]=1.0/4;// Sobel kernel Y
     vpMatrix Kl(3,3,-1.0/8); Kl[1][1]=8.0/8; // Laplacien 8-voisins
 
     vpMatrix test(3,3,1.0/16);
@@ -247,7 +248,7 @@ int main(int argc, char **argv)
     
     
     //filtrage2D_separable(I0,Ic,F2,F3);
-    filtrage2D(I0,Ic,Kl);
+    filtrage2D(I0,Ic,Ksy);
 
 
     // for(int i = 0; i<height; i++) //Pour filtre sans négatif
