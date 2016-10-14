@@ -41,6 +41,7 @@ SET (SOURCE
   tp2-v0.cpp
   tp3.cpp
   tp4.cpp
+  tp5.cpp
 )
 
 # rule for binary build

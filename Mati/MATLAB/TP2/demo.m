@@ -50,7 +50,7 @@ X_bruit = X + sigma*randn(size(X));
 seuil = 0.0001;
 dt = 0.01;
 epsilon = 0.01;
-lambda = 3;
+lambda = 3.1;
 
 X_restored = restaurationPhi(X_bruit,seuil,dt,epsilon,lambda);
 snr=snr(X,X_restored)
@@ -60,7 +60,16 @@ subplot(3,1,1); imshow(X,[]);
 subplot(3,1,2); imshow(X_restored,[]);
 subplot(3,1,3); imshow(X_bruit,[]);
 
-%Inpainting
+%Deconvolution
+
+seuil = 0.0001;
+dt = 0.01;
+e = 4;
+t = (6*e)+1;
+
+I7=gauss(I,e,t);
+
+deconvo(I7,seuil,dt,e,t);
 
 
 

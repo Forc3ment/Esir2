@@ -118,7 +118,7 @@ double convolution(const vpImage< unsigned char > &I, int i, int j, const vpMatr
     	m++;
     }
 
-    return sum/(double)(rows*cols);
+    return sum;
     
 }
 
@@ -156,7 +156,7 @@ double convolution1D(const vpImage< double > &I, int i, int j, const vpMatrix &K
     	n++;
     }
 
-    return sum/(double)(rows*cols);
+    return sum;
     
 }
 
@@ -235,26 +235,31 @@ int main(int argc, char **argv)
     If.resize(height,width,0);
 
     // declarations des filtres
-    vpMatrix F1(1,3,1);
+    vpMatrix F1(1,3,1.0/9);
+    vpMatrix F2(1,3,1);F2[0][0]=1.0/16;F2[0][1]=2.0/16;F2[0][2]=1.0/16;
+    vpMatrix F3(1,3,1);F3[0][0]=1;F3[0][1]=2;F3[0][2]=1;
     vpMatrix Ka(5,5,1); // Filtre moyenneur
     vpMatrix Ks(3,3); // Sobel kernel
-    vpMatrix Kl(3,3,-1/8); // Laplacien 8-voisins
+    vpMatrix Kl(3,3,-1.0/8); Kl[1][1]=8.0/8; // Laplacien 8-voisins
 
-    vpMatrix test(3,3,0);
-    test[0][0]=-2;test[0][1]=-1;test[1][0]=-1;test[1][1]=1;test[1][2]=1;test[2][1]=1;test[2][2]=2;
+    vpMatrix test(3,3,1.0/16);
+    test[0][1]=2.0/16;test[1][0]=2.0/16;test[1][1]=4.0/16;test[1][2]=2.0/16;test[2][1]=2.0/16;
     
     
-    //filtrage2D_separable(I0,Ic,F1,F1);
-    filtrage2D(I0,Ic,test);
+    //filtrage2D_separable(I0,Ic,F2,F3);
+    filtrage2D(I0,Ic,Kl);
 
 
-    for(int i = 0; i<height; i++)
-    {
-    	for(int j = 0; j<width; j++)
-    	{
-    		If[i][j] = (unsigned char)Ic[i][j];
-    	}
-    }
+    // for(int i = 0; i<height; i++) //Pour filtre sans négatif
+    // {
+    // 	for(int j = 0; j<width; j++)
+    // 	{
+    // 		If[i][j] = (unsigned char)Ic[i][j];
+    // 	}
+    // }
+
+    vpImageConvert::convert(Ic,If);
+
 
    	//affiche(Ic);
 

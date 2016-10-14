@@ -42,6 +42,6 @@ for i=1:1000
     
     
     
-    imshow(uint8(Msobolev));drawnow;
+    %imshow(uint8(Msobolev));drawnow;
 end
-
+imshow(uint8(Msobolev));
