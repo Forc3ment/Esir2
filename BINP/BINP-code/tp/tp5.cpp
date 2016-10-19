@@ -243,7 +243,10 @@ vpImage< unsigned char > erosion_dual(const vpImage< unsigned char > &I, const v
     
     //Allocate memory for an [height x width] image and initialize the image to val.
     vpImage< unsigned char >Ie(I.getHeight(),I.getWidth(),0) ;
-    
+    Ie=I;
+    Ie=complementaire(Ie);
+    Ie=dilatation(Ie,es);
+    Ie=complementaire(Ie);
     return Ie;
 }
 
@@ -256,8 +259,10 @@ vpImage< unsigned char > dilatation_dual(const vpImage< unsigned char > &I, cons
     
     //Allocate memory for an [height x width] image and initialize the image to val.
     vpImage< unsigned char > Id(I.getHeight(),I.getWidth(),0) ;
-    
-    
+    Id=I;
+    Id=complementaire(Id);
+    Id=dilatation(Id,es);
+    Id=complementaire(Id);
     return Id;
 }
 
@@ -268,8 +273,10 @@ vpImage< unsigned char > dilatation_dual(const vpImage< unsigned char > &I, cons
 vpImage< unsigned char >  ouverture_dual(vpImage< unsigned char > &I, const vpImage< unsigned char > &es)
 {
     vpImage< unsigned char >Io;
-    
-    
+    Io=I;
+    Io=complementaire(Io);
+    Io=dilatation(Io,es);
+    Io=complementaire(Io);
     return Io;
     
 }
@@ -281,8 +288,10 @@ vpImage< unsigned char >  ouverture_dual(vpImage< unsigned char > &I, const vpIm
 vpImage< unsigned char >  fermeture_dual(vpImage< unsigned char > &I, const vpImage< unsigned char > &es)
 {
     vpImage< unsigned char >If;
-    
-    
+    If=I;
+    If=complementaire(If);
+    If=dilatation(If,es);
+    If=complementaire(If);
     return If;
     
 }
@@ -586,9 +595,14 @@ int main(int argc, char **argv)
     vpImage<unsigned char> gabarit(3,3,0);
     gabarit[1][1]=255;
     
-    // vpImage<unsigned char> Idilate=dilatation(I0,ES);
-    // afficheImage(Idilate,100,100,"Image dilatee") ;
-    // vpImageIo::write(Idilate,"../resultat/image_dilatee.pgm");
+    vpImage<unsigned char> Idilate=dilatation(I0,ES);
+    afficheImage(Idilate,100,100,"Image dilatee") ;
+    vpImageIo::write(Idilate,"../resultat/image_dilatee.pgm");
+
+    vpImage<unsigned char> Idilate_dual=dilatation_dual(I0,ES);
+    afficheImage(Idilate_dual,100,100,"Image dilatee dual") ;
+    vpImageIo::write(Idilate_dual,"../resultat/image_dilatee_dual.pgm");
+
 
     // vpImage<unsigned char> Ierode=erosion(I0,ES);
     // afficheImage(Ierode,100,100,"Image erodee") ;
@@ -626,16 +640,16 @@ int main(int argc, char **argv)
     // afficheImage(Ilaplacien,100,100,"Laplacien morphologique") ;
     // vpImageIo::write(Ilaplacien,"../resultat/image_laplacien.pgm");
 
-    vpImage<unsigned char> Ittr=toutourien(I0,gabarit);
-    //afficheImage(gabarit,100,100,"");
-    afficheImage(Ittr,100,100,"Transformee en tout ou rien") ;
-    vpImageIo::write(Ittr,"../resultat/image_ttr.pgm");
+    // vpImage<unsigned char> Ittr=toutourien(I0,gabarit);
+    // afficheImage(Ittr,100,100,"Transformee en tout ou rien") ;
+    // vpImageIo::write(Ittr,"../resultat/image_ttr.pgm");
 
 
     // Desallocation
     I0.destroy();
-    //I1.destroy();
-    // Idilate.destroy();
+    // I1.destroy();
+    Idilate.destroy();
+    Idilate_dual.destroy();
     // Ierode.destroy();
     // Iopen.destroy();
     // Iclose.destroy();
@@ -645,7 +659,7 @@ int main(int argc, char **argv)
     // Iclose_NDG.destroy();
     // Igrad.destroy();
     // Ilaplacien.destroy();
-    Ittr.destroy();
+    // Ittr.destroy();
 
     ES.destroy();
     masque.destroy();
