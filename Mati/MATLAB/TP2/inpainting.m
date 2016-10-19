@@ -5,7 +5,7 @@ name='cameraman.png';
 
 M = double(imread(name));
 % amount of removed pixels.
-rho = .5;
+rho = .8;
 %random mask, mask==1 for removed pixels
 mask = zeros(size(M));
 sel = randperm(numel(M)); sel = sel(1:round(rho*numel(M)));

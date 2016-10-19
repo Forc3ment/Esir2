@@ -281,7 +281,7 @@ int main(int argc, char **argv)
     
     
     //filtrage2D_separable(I0,Ic,F2,F3);
-    //filtrage2D(I0,Ic,Ksy);
+    filtrage2D(I0,Ic,Ksx);
 
     // for(int i = 0; i<height; i++) //Pour filtre sans négatif
     // {
@@ -291,9 +291,9 @@ int main(int argc, char **argv)
     // 	}
     // }
 
-    //vpImageConvert::convert(Ic,If); //pour filtre dérivatif
+    vpImageConvert::convert(Ic,If); //pour filtre dérivatif
 
-    filtre_median(I0,If,3);
+    //filtre_median(I0,If,3);
 
    	//affiche(Ic);
 
