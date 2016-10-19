@@ -261,7 +261,7 @@ vpImage< unsigned char > dilatation_dual(const vpImage< unsigned char > &I, cons
     vpImage< unsigned char > Id(I.getHeight(),I.getWidth(),0) ;
     Id=I;
     Id=complementaire(Id);
-    Id=dilatation(Id,es);
+    Id=erosion(Id,es);
     Id=complementaire(Id);
     return Id;
 }
@@ -275,7 +275,7 @@ vpImage< unsigned char >  ouverture_dual(vpImage< unsigned char > &I, const vpIm
     vpImage< unsigned char >Io;
     Io=I;
     Io=complementaire(Io);
-    Io=dilatation(Io,es);
+    Io=fermeture(Io,es);
     Io=complementaire(Io);
     return Io;
     
@@ -290,7 +290,7 @@ vpImage< unsigned char >  fermeture_dual(vpImage< unsigned char > &I, const vpIm
     vpImage< unsigned char >If;
     If=I;
     If=complementaire(If);
-    If=dilatation(If,es);
+    If=ouverture(If,es);
     If=complementaire(If);
     return If;
     
