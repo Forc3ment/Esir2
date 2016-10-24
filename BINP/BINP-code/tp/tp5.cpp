@@ -483,11 +483,6 @@ vpImage< unsigned char >  laplacien_morpho(vpImage< unsigned char > &I, const vp
         for(int j = 0; j<width; j++)
         {
             int val = (int)erosion[i][j] + (int)dilatation[i][j] - 2*(int)I[i][j];
-            // if (val > 255)
-            //     laplacien[i][j] = 255;
-            // if (val< 0)
-            //     laplacien[i][j] = 0;
-
             laplacien[i][j] = (unsigned char)abs(val);
         }
     }
@@ -576,7 +571,7 @@ int main(int argc, char **argv)
 	
 	// chargement d'une image
 	vpImage<unsigned char>  I0;
-    //vpImage<unsigned char>  I1;
+    vpImage<unsigned char>  I1;
     //vpImage<unsigned char>  I2;
 	string sIm;
     // cout << "Nom de l'image : "; cin >> sIm; // Ex: ../images/lena.pgm
@@ -586,8 +581,8 @@ int main(int argc, char **argv)
     vpImageIo::read(I0,"../images/test_operateur_bin.pgm"); //Binaire
     afficheImage(I0,100,100,"Image originale") ;
 
-    // vpImageIo::read(I1,"../images/lena.pgm"); //NDG
-    // afficheImage(I1,100,100,"Image originale") ;
+    vpImageIo::read(I1,"../images/lena.pgm"); //NDG
+    afficheImage(I1,100,100,"Image originale") ;
     
     // element structurant
     vpImage<unsigned char>  ES(3,3,255);
@@ -636,9 +631,9 @@ int main(int argc, char **argv)
     // afficheImage(Igrad,100,100,"Gradient morphologique") ;
     // vpImageIo::write(Igrad,"../resultat/image_grad.pgm");
 
-    // vpImage<unsigned char> Ilaplacien=laplacien_morpho(I1,ES);
-    // afficheImage(Ilaplacien,100,100,"Laplacien morphologique") ;
-    // vpImageIo::write(Ilaplacien,"../resultat/image_laplacien.pgm");
+    vpImage<unsigned char> Ilaplacien=laplacien_morpho(I1,ES);
+    afficheImage(Ilaplacien,100,100,"Laplacien morphologique") ;
+    vpImageIo::write(Ilaplacien,"../resultat/image_laplacien.pgm");
 
     // vpImage<unsigned char> Ittr=toutourien(I0,gabarit);
     // afficheImage(Ittr,100,100,"Transformee en tout ou rien") ;
@@ -647,7 +642,7 @@ int main(int argc, char **argv)
 
     // Desallocation
     I0.destroy();
-    // I1.destroy();
+    I1.destroy();
     Idilate.destroy();
     Idilate_dual.destroy();
     // Ierode.destroy();
@@ -658,7 +653,7 @@ int main(int argc, char **argv)
     // Iopen_NDG.destroy();
     // Iclose_NDG.destroy();
     // Igrad.destroy();
-    // Ilaplacien.destroy();
+    Ilaplacien.destroy();
     // Ittr.destroy();
 
     ES.destroy();

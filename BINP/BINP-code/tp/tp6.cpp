@@ -53,24 +53,6 @@ void afficheImage(vpImage<unsigned char> img, int posX, int posY, const char *ti
     vpDisplay::close(img);
 }
 
-
-
-/**
- * @brief retourne l'indice du centroide le plus proche du niveau de gris 'ndg'
- * @param ndg : valeur du niveau de gris dont on cherche le centroide le plus proche
- * @param centers : tableau contenant l'ensemble des centroides auxquels on compare 'ndg'
- * @param size : nombre de centres (taille du tableau)
- */
-int find_center(unsigned char ndg, const int* centers, const int size){
-    
-    int index=0;
-
-    
-    return index;
-   
-}
-
-
 void histogramme(const vpImage<unsigned char>  &I, unsigned int* histo, int &max)
 {
     unsigned int i = I.getHeight();
@@ -93,6 +75,10 @@ void histogramme(const vpImage<unsigned char>  &I, unsigned int* histo, int &max
     }
 }
 
+/**
+ * @brief effectue le traitement d'une boucle: calcul des nouveaux centre puis des nouveaux seuil
+ * et verification que les centre ne sont pas egaux avant et apres la boucle. 
+ */
 bool boucle(int* center,int* seuil,unsigned int* histo, int k)
 {
     int ancien_centre[k];
@@ -140,11 +126,13 @@ void k_means(const vpImage<unsigned char>  &I, vpImage<unsigned char>  &Is, int 
     // initialisation des k centres
     int* center= new int[k];
 
+    // Répartition equitable des centre.
     for (int i = 0; i < k; i++)
     {
-        center[i] = ((double)(i+1)/(double)(k+1))*256;
+        center[i] = ((double)(i+1)/(double)(k+1))*256; 
     }
 
+    // calcul des seuil a partir des centre.
     int* seuil = new int [k+1];
     seuil[0]=0;
     seuil[k]=255;
@@ -152,24 +140,15 @@ void k_means(const vpImage<unsigned char>  &I, vpImage<unsigned char>  &Is, int 
     {
         seuil[i]= (center[i] + center[i-1])/2;
     }
-
-    // calcul des valeurs des k centres
-    // 1. classification des pixels par rapport a leur distance aux centres courants
-    // 2. recalcul des centres de gravite en fonction des pixels qui leur ont ete assigne
-    // 3. calcul de la condition d'arret
     
+    //calcul de l'histogrammede l'image
     histogramme(I, histo, max);
 
+    // Réalisation du traitement tant que les centre ne sont pas égaux.
     while(! boucle(center, seuil, histo, k))
     {
-        for (int i = 0; i<k; i++)
-        {
-            cout << "seuil "<<i<< " : " <<seuil[i] << endl;
-            cout << "centre "<<i<< " : " <<center[i] << endl;
-        }
         nb_ite++;
     } 
-    
     
     cout << "nb iterations : " << nb_ite << endl;
     
@@ -179,11 +158,17 @@ void k_means(const vpImage<unsigned char>  &I, vpImage<unsigned char>  &Is, int 
         for (int j=0; j<I.getWidth();j++){
             for(int a = 1; a < k+1; a++)
             {
-                if(Is[i][j]<seuil[a]) Is[i][j]=center[a-1];
+                if(I[i][j]<seuil[a] && I[i][j]>=seuil[a-1]) Is[i][j]=center[a-1];
             }
         }
     }
-    
+
+    for (int i = 0; i < k; i++)
+    {
+        cout << "centre : " << center[i] << endl; 
+    }
+
+
     delete[] center;
     delete[] seuil;
 }
@@ -192,7 +177,27 @@ void k_means(const vpImage<unsigned char>  &I, vpImage<unsigned char>  &Is, int 
 
 void quantification_uniforme(const vpImage<unsigned char>  &I, vpImage<unsigned char>  &Iq, int nb_nv)
 {
+    int heigth = I.getHeight();
+    int width = I.getWidth();
+    int q = 256/nb_nv;                        //pas de quantification
 
+    vpImage<unsigned char> I1 (heigth, width);
+
+    for(int i=0; i<heigth; i++)
+    {
+        for(int j=0; j<width; j++)
+        {
+            for(int t=0; t<256; t+=q)
+            {
+                if(I[i][j]>=t && I[i][j]<t+q)
+                {
+                    Iq[i][j] = t + q/2;
+                }
+            }
+        }
+    }
+
+    for(int t=0; t<256; t+=q) cout << "centre : " << t << endl;
 
 }
 
@@ -216,26 +221,25 @@ int main(int argc, char **argv)
 	//vpImageIo::read(I0,sIm) ;
 
     // A decommenter pour debugger
-    vpImageIo::read(I0,"../images/graines.jpg");
+    vpImageIo::read(I0,"../images/lena.pgm");
     afficheImage(I0,100,100,"Image originale") ;
-    
     
     /// Segmentation par k-means
   	vpImage<unsigned char>  Isegm(I0.getHeight(),I0.getWidth(),0);
     k_means(I0, Isegm, 2);
     afficheImage(Isegm,100,500,"Image segmentee") ;
-    vpImageIo::write(Isegm,"../resultats/Isegm.pgm");
+    vpImageIo::write(Isegm,"../resultat/Isegm.pgm");
     
     /// Segmentation par quantification uniforme
-    //vpImage<unsigned char>  Iquantif(I0.getHeight(),I0.getWidth(),0);
-    //quantification_uniforme(I0,Iquantif,2);
-    //afficheImage(Iquantif,500,100,"Image quantifiee") ;
-    //vpImageIo::write(Iquantif,"../resultats/Iquantif.pgm");
+    vpImage<unsigned char>  Iquantif(I0.getHeight(),I0.getWidth(),0);
+    quantification_uniforme(I0,Iquantif,2);
+    afficheImage(Iquantif,100,500,"Image quantifiee") ;
+    vpImageIo::write(Iquantif,"../resultat/Iquantif.pgm");
     
     // Desallocation
     I0.destroy();
     Isegm.destroy();
-    //Iquantif.destroy();
+    Iquantif.destroy();
      
 	cout << "Fin du programme " << endl ;
 	return(0);
