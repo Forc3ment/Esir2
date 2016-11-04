@@ -210,6 +210,8 @@ void quantification_uniforme(const vpImage<unsigned char>  &I, vpImage<unsigned 
 
 int main(int argc, char **argv)
 {
+    int nb_nv = 2;
+
 	// creation du menu
 	cout << "BINP TP 6 :  SEGMENTATION " << endl ;
 	cout << "--" << endl ;
@@ -226,13 +228,13 @@ int main(int argc, char **argv)
     
     /// Segmentation par k-means
   	vpImage<unsigned char>  Isegm(I0.getHeight(),I0.getWidth(),0);
-    k_means(I0, Isegm, 2);
+    k_means(I0, Isegm, nb_nv);
     afficheImage(Isegm,100,500,"Image segmentee") ;
     vpImageIo::write(Isegm,"../resultat/Isegm.pgm");
     
     /// Segmentation par quantification uniforme
     vpImage<unsigned char>  Iquantif(I0.getHeight(),I0.getWidth(),0);
-    quantification_uniforme(I0,Iquantif,2);
+    quantification_uniforme(I0,Iquantif,nb_nv);
     afficheImage(Iquantif,100,500,"Image quantifiee") ;
     vpImageIo::write(Iquantif,"../resultat/Iquantif.pgm");
     

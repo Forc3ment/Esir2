@@ -6,7 +6,7 @@ G=1./toto;
 for t=0:n-1
     
 
-    Phi =  Phi .+  dt .*( G .* (alpha.*courbure(Phi) .+ normgrad_contraction_expansion(Phi,C)));
+    Phi =  Phi .+  dt .*( G .* (alpha.*courbure(Phi) .+ normgrad_contraction_expansion(Phi,c)));
     
     % on affiche tous les nb_affiche
     if (mod(t,nb_affiche)==0)

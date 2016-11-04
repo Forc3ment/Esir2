@@ -1,0 +1,13 @@
+donnees d'entree: 
+       1        1        1        1 
+partie reelle: 
+       4        0        0        0 
+partie imaginaire: 
+       0        0        0        0 
+module: 
+       4        0        0        0 
+
+ fft inv partie reelle : 
+       1        1        1        1 
+fft inv partie imaginaire: 
+       0       -0       -0       -0 

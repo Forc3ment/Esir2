@@ -43,6 +43,7 @@ SET (SOURCE
   tp4.cpp
   tp5.cpp
   tp6.cpp
+  tp7.cpp
 )
 
 # rule for binary build

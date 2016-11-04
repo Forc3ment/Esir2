@@ -1,0 +1,42 @@
+donnees initiales 
+       1        2        3        4 
+       5        6        7        8 
+       9       10       11       12 
+      13       14       15       16 
+
+fft: partie reelle 
+     136       -8       -8       -8 
+     -32        0        0        0 
+     -32        0        0        0 
+     -32        0        0        0 
+
+fft: partie immaginaire 
+       0        8        0       -8 
+      32        0        0        0 
+       0        0        0        0 
+     -32        0        0        0 
+
+fft: module 
+     136  11.3137        8  11.3137 
+ 45.2548        0        0        0 
+      32        0        0        0 
+ 45.2548        0        0        0 
+
+fft: module avec origine au centre
+       0        0       32        0 
+       0        0  45.2548        0 
+       8  11.3137      136  11.3137 
+       0        0  45.2548        0 
+
+fft_inverse : partie reelle 
+       1        2        3        4 
+       5        6        7        8 
+       9       10       11       12 
+      13       14       15       16 
+
+fft_inverse : partie immaginaire 
+      -0       -0       -0       -0 
+      -0       -0       -0       -0 
+      -0       -0       -0       -0 
+      -0       -0       -0       -0 
+
