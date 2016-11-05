@@ -427,7 +427,7 @@ void FFT_IM()
 
   /* lecture d'une image en format pgm */
   char fileName[250];
-  strcpy(fileName, "./images/lenabruitee.pgm");
+  strcpy(fileName, "./images/lena.pgm");
   int n = 512 ;
   im1 = new unsigned char [n*n];
 
@@ -461,7 +461,7 @@ void FFT_IM()
 
   for (i=0;i<n;i++){
     for(j=0;j<n;j++){
-      val_double = log(1+ (immod[n*i+j])) / log(1+max) * 255 ;
+      val_double = log(1+ immod[n*i+j]) / log(1+max) * 255 ;
       im2[i*n+j]  = (unsigned char) (val_double);
     }
   }
