@@ -8,7 +8,15 @@
 // Calcul du gradient de imgIn  (Attention aux bords)
 void IMgradient (unsigned char *imgIn, unsigned char *imgOut, int sizeX, int sizeY)
 {
-
+	for(int i=0; i<sizeX; i++)
+	{
+		for(int j=0; j<sizeY; j++)
+		{
+			unsigned char dx = (imgIn[i*sizeX+j]-imgIn[(i+1)*sizeX+j])/2;
+			unsigned char dy = (imgIn[i*sizeX+j]-imgIn[i*sizeX+j+1])/2; 
+			imgOut[i*sizeX+j]= sqrt(dx*dx
+		}
+	}
 }
 
 // Recherche du chemin d'energie minimale dans imgIn 

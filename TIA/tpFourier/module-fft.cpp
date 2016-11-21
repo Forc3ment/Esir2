@@ -3,6 +3,7 @@
 #include "module-fft.h"
 #include "imagesRW.h"
 
+
 /********************************************************************************
 *		FFT - Entrelacement temporel					*
 *										*
@@ -171,7 +172,23 @@ void decal_origine (double *x,int n)
       x[n*k+l] = val;
     }
   }
+}
 
+void decal_origine (unsigned char *x,int n)
+
+{
+  unsigned char  val;
+  int i,j,k,l;
+
+  for(i=0;i<n/2;i++){
+    for(j=0;j<n;j++){
+      k = (i+n/2) % n;
+      l = (j+n/2) % n;
+      val = x[n*i+j];
+      x[n*i+j] = x[n*k+l];
+      x[n*k+l] = val;
+    }
+  }
 }
 
 /************** FIN decal_origine ************************************************/
@@ -427,7 +444,7 @@ void FFT_IM()
 
   /* lecture d'une image en format pgm */
   char fileName[250];
-  strcpy(fileName, "./images/lena.pgm");
+  strcpy(fileName, "./images/lenabruitee.pgm");
   int n = 512 ;
   im1 = new unsigned char [n*n];
 
@@ -495,3 +512,579 @@ void FFT_IM()
 }
 
 /************** FIN FFT_IM *************************************************/
+
+double convolution_median(const double* im, int i, int j, int size, int sizeImage)
+{
+    int rows = size;
+    int cols = size;
+    int heigth = sizeImage;
+    int width = sizeImage;
+
+    ::std::vector<unsigned char>  toto (size*size,0); 
+    int n = 0;
+
+    for(int k = -rows/2; k<=rows/2; k++)
+    {
+        for(int l = -cols/2; l<=cols/2; l++)
+        {
+            if(i+k<0 || i+k>=heigth || j+l<0 || j+l>=width)
+                toto[n]=0;
+            else    
+                toto[n]=im[(i+k)*n+j+l];
+            n++;
+        }
+    }
+
+    std::sort(toto.begin(),toto.end());
+
+    return toto[((size*size)/2)];
+    
+}
+
+/******************* procedure FFT_IM  ***************************************
+
+  - lit une image au format pgm.
+  - calcule sa fft2d ainsi que son module.  
+  - ecrit le module dans le fichier image fft-im.pgm (avec mise a l'echelle)
+  - calcule la fft imverse
+  - ecrit la fft inverse dans le fichier image  fft-im-inv.pgm
+
+    **************************************************************************/
+
+void FFT_IM_debruitee(int test)
+{   
+  double *imx,*imy,*immod;
+  unsigned char *im1,*im2;
+  unsigned char *filtre;
+  int i,j;
+  int k;
+  double val_double;
+  double max;
+
+  /* lecture d'une image en format pgm */
+  char fileName[250];
+  strcpy(fileName, "./images/lenabruitee.pgm");
+  int n = 512 ;
+  im1 = new unsigned char [n*n];
+
+  printf("\n Ouverture de %s de taille [%d,%d]", fileName, n, n);
+  readPGM_Picture(fileName, im1, n, n);
+
+  /* lecture d'une image en format pgm */
+  fileName[250];
+  strcpy(fileName, "./fft_im_debruitee.pgm");
+  n = 512 ;
+  filtre = new unsigned char [n*n];
+
+  printf("\n Ouverture de %s de taille [%d,%d]", fileName, n, n);
+  readPGM_Picture(fileName, filtre, n, n);
+
+  /*initialisation des vecteurs d'entree reel et imaginaire*/
+  imx = new double[n*n];
+  imy = new double[n*n];
+  immod = new double[n*n];
+  for(i=0;i<n;i++){
+    for(j=0;j<n;j++){
+      k=n*i+j;
+      imx[k] = double (im1[k]);
+      imy[k] = 0.0;
+    }
+  }
+
+  /* calcul de la fft-2D */
+  fft_2D(imx,imy,n);
+  decal_origine(filtre,n);
+  
+  for (i=0;i<n;i++){
+    for(j=0;j<n;j++){
+      if(filtre[i*n+j] == 0) 
+      {
+        imx[i*n+j] = convolution_median(imx, i, j, test, n);
+        imy[i*n+j] = convolution_median(imy, i, j, test, n);
+      }
+    }
+  }
+
+  module(imx,imy,n*n,immod);
+  decal_origine(immod,n);
+
+  /* ecriture dans une image */
+  im2 = new unsigned char [n*n];
+
+  max=0; /* variable de remise a l'echelle*/
+  for (i=0;i<n*n;i++)
+    if ( immod[i] > max) max=immod[i];
+
+  for (i=0;i<n;i++){
+    for(j=0;j<n;j++){
+      val_double = log(1+ immod[n*i+j]) / log(1+max) * 255 ;
+      im2[i*n+j]  = (unsigned char) (val_double);
+    }
+  }
+ 
+  /* sauvegarde dans un fichier */
+  printf("\n Sauvegardez l'image de la FFT sous fft-im.pgm ");
+  strcpy(fileName, "fft_im.pgm");
+  writePGM_Picture(fileName, im2, n, n);
+ 
+  /* calcul de la FFT inverse */
+  fft_2D_inv(imx,imy,n);
+
+  /* ecriture dans une image */
+  for (i=0;i<n;i++){
+    for(j=0;j<n;j++){
+      im2[i*n+j]  = (unsigned char) (imx[n*i+j]);
+    }
+  }
+  /* sauvegarde dans un fichier */
+  printf("\n Sauvegardez l'image de la FFT inverse sous fft-im-inv.pgm ");  
+  strcpy(fileName, "fft_im_inv.pgm");
+  writePGM_Picture(fileName, im2, n, n);
+
+  delete [] imx;
+  delete [] imy;
+  delete [] immod;
+
+  delete [] im1;
+  delete [] im2;
+  delete [] filtre;
+
+}
+
+
+
+/************** FIN FFT_IM_filtre_ideal *************************************************/
+
+/******************* procedure FFT_IM_filtre_ideal  ***************************************
+
+  - lit une image au format pgm.
+  - calcule sa fft2d ainsi que son module.
+  - filtre selon un filtre ideal  
+  - ecrit le module dans le fichier image fft-im.pgm (avec mise a l'echelle)
+  - calcule la fft imverse
+  - ecrit la fft inverse dans le fichier image  fft-im-inv.pgm
+
+    **************************************************************************/
+
+void FFT_IM_filtre_ideal(double seuil)
+{   
+  double *imx,*imy,*immod;
+  unsigned char *im1,*im2;
+  int i,j;
+  int k;
+  double val_double;
+  double max;
+
+  /* lecture d'une image en format pgm */
+  char fileName[250];
+  strcpy(fileName, "./images/lena.pgm");
+  int n = 512 ;
+  im1 = new unsigned char [n*n];
+
+  printf("\n Ouverture de %s de taille [%d,%d]", fileName, n, n);
+  readPGM_Picture(fileName, im1, n, n);
+
+  /*initialisation des vecteurs d'entree reel et imaginaire*/
+  imx = new double[n*n];
+  imy = new double[n*n];
+  immod = new double[n*n];
+  for(i=0;i<n;i++){
+    for(j=0;j<n;j++){
+      k=n*i+j;
+      imx[k] = double (im1[k]);
+      imy[k] = 0.0;
+    }
+  }
+
+  /* calcul de la fft-2D */
+  fft_2D(imx,imy,n);
+
+  /* Application du filtre*/
+  decal_origine(imx,n);
+  decal_origine(imy,n);
+  for(i=0;i<n;i++){
+    for(j=0;j<n;j++){
+      double D = sqrt((i-n/2)*(i-n/2) + (j-n/2)*(j-n/2));
+      if(D>seuil)
+      {
+        imx[i*n+j]=0;
+        imy[i*n+j]=0;
+      }
+    }
+  }
+  decal_origine(imx,n);
+  decal_origine(imy,n);
+
+  /* creation du spectre affichable*/
+  module(imx,imy,n*n,immod);
+  decal_origine(immod,n);
+
+  /* ecriture dans une image */
+  im2 = new unsigned char [n*n];
+
+  max=0; /* variable de remise a l'echelle*/
+  for (i=0;i<n*n;i++)
+    if ( immod[i] > max) max=immod[i];
+
+  for (i=0;i<n;i++){
+    for(j=0;j<n;j++){
+      val_double = log(1+ immod[n*i+j]) / log(1+max) * 255 ;
+      im2[i*n+j]  = (unsigned char) (val_double);
+    }
+  }
+ 
+  /* sauvegarde dans un fichier */
+  printf("\n Sauvegardez l'image de la FFT sous fft-im.pgm ");
+  strcpy(fileName, "fft_im.pgm");
+  writePGM_Picture(fileName, im2, n, n);
+ 
+  /* calcul de la FFT inverse */
+  fft_2D_inv(imx,imy,n);
+
+  /* ecriture dans une image */
+  for (i=0;i<n;i++){
+    for(j=0;j<n;j++){
+      im2[i*n+j]  = (unsigned char) (imx[n*i+j]);
+    }
+  }
+  /* sauvegarde dans un fichier */
+  printf("\n Sauvegardez l'image de la FFT inverse sous fft-im-inv.pgm ");  
+  strcpy(fileName, "fft_im_inv.pgm");
+  writePGM_Picture(fileName, im2, n, n);
+
+  delete [] imx;
+  delete [] imy;
+  delete [] immod;
+
+  delete [] im1;
+  delete [] im2;
+
+}
+
+/************** FIN FFT_IM_filtre_ideal *************************************************/
+
+
+/************** FIN FFT_IM_filtre_Butterworth *************************************************/
+
+/******************* procedure FFT_IM_filtre_Butterworth  ***************************************
+
+  - lit une image au format pgm.
+  - calcule sa fft2d ainsi que son module.
+  - filtre selon un filtre de Butterworth  
+  - ecrit le module dans le fichier image fft-im.pgm (avec mise a l'echelle)
+  - calcule la fft imverse
+  - ecrit la fft inverse dans le fichier image  fft-im-inv.pgm
+
+    **************************************************************************/
+
+void FFT_IM_filtre_Butterworth(double seuil, int ordre)
+{   
+  double *imx,*imy,*immod;
+  unsigned char *im1,*im2;
+  int i,j;
+  int k;
+  double val_double;
+  double max;
+
+  /* lecture d'une image en format pgm */
+  char fileName[250];
+  strcpy(fileName, "./images/lena.pgm");
+  int n = 512 ;
+  im1 = new unsigned char [n*n];
+
+  printf("\n Ouverture de %s de taille [%d,%d]", fileName, n, n);
+  readPGM_Picture(fileName, im1, n, n);
+
+  /*initialisation des vecteurs d'entree reel et imaginaire*/
+  imx = new double[n*n];
+  imy = new double[n*n];
+  immod = new double[n*n];
+  for(i=0;i<n;i++){
+    for(j=0;j<n;j++){
+      k=n*i+j;
+      imx[k] = double (im1[k]);
+      imy[k] = 0.0;
+    }
+  }
+
+  /* calcul de la fft-2D */
+  fft_2D(imx,imy,n);
+
+  /* Application du filtre*/
+  decal_origine(imx,n);
+  decal_origine(imy,n);
+  for(i=0;i<n;i++){
+    for(j=0;j<n;j++){
+      double D = sqrt((i-n/2)*(i-n/2) + (j-n/2)*(j-n/2));
+      double H = 1/(1+pow(D/seuil,2*ordre));
+      imx[i*n+j]=imx[i*n+j]*H;
+      imy[i*n+j]=imy[i*n+j]*H;
+    }
+  }
+  decal_origine(imx,n);
+  decal_origine(imy,n);
+
+  /* creation du spectre affichable*/
+  module(imx,imy,n*n,immod);
+  decal_origine(immod,n);
+
+  /* ecriture dans une image */
+  im2 = new unsigned char [n*n];
+
+  max=0; /* variable de remise a l'echelle*/
+  for (i=0;i<n*n;i++)
+    if ( immod[i] > max) max=immod[i];
+
+  for (i=0;i<n;i++){
+    for(j=0;j<n;j++){
+      val_double = log(1+ immod[n*i+j]) / log(1+max) * 255 ;
+      im2[i*n+j]  = (unsigned char) (val_double);
+    }
+  }
+ 
+  /* sauvegarde dans un fichier */
+  printf("\n Sauvegardez l'image de la FFT sous fft-im.pgm ");
+  strcpy(fileName, "fft_im.pgm");
+  writePGM_Picture(fileName, im2, n, n);
+ 
+  /* calcul de la FFT inverse */
+  fft_2D_inv(imx,imy,n);
+
+  /* ecriture dans une image */
+  for (i=0;i<n;i++){
+    for(j=0;j<n;j++){
+      im2[i*n+j]  = (unsigned char) (imx[n*i+j]);
+    }
+  }
+  /* sauvegarde dans un fichier */
+  printf("\n Sauvegardez l'image de la FFT inverse sous fft-im-inv.pgm ");  
+  strcpy(fileName, "fft_im_inv.pgm");
+  writePGM_Picture(fileName, im2, n, n);
+
+  delete [] imx;
+  delete [] imy;
+  delete [] immod;
+
+  delete [] im1;
+  delete [] im2;
+
+}
+
+/************** FIN FFT_IM_filtre_Butterworth *************************************************/
+
+/************** FIN FFT_IM_filtre_Gaussien *************************************************/
+
+/******************* procedure FFT_IM_filtre_Gaussien  ***************************************
+
+  - lit une image au format pgm.
+  - calcule sa fft2d ainsi que son module.
+  - filtre selon un filtre Gaussien  
+  - ecrit le module dans le fichier image fft-im.pgm (avec mise a l'echelle)
+  - calcule la fft imverse
+  - ecrit la fft inverse dans le fichier image  fft-im-inv.pgm
+
+    **************************************************************************/
+
+void FFT_IM_filtre_Gaussien(double seuil)
+{   
+  double *imx,*imy,*immod;
+  unsigned char *im1,*im2;
+  int i,j;
+  int k;
+  double val_double;
+  double max;
+
+  /* lecture d'une image en format pgm */
+  char fileName[250];
+  strcpy(fileName, "./images/lena.pgm");
+  int n = 512 ;
+  im1 = new unsigned char [n*n];
+
+  printf("\n Ouverture de %s de taille [%d,%d]", fileName, n, n);
+  readPGM_Picture(fileName, im1, n, n);
+
+  /*initialisation des vecteurs d'entree reel et imaginaire*/
+  imx = new double[n*n];
+  imy = new double[n*n];
+  immod = new double[n*n];
+  for(i=0;i<n;i++){
+    for(j=0;j<n;j++){
+      k=n*i+j;
+      imx[k] = double (im1[k]);
+      imy[k] = 0.0;
+    }
+  }
+
+  /* calcul de la fft-2D */
+  fft_2D(imx,imy,n);
+
+  /* Application du filtre*/
+  decal_origine(imx,n);
+  decal_origine(imy,n);
+  for(i=0;i<n;i++){
+    for(j=0;j<n;j++){
+      double D = sqrt((i-n/2)*(i-n/2) + (j-n/2)*(j-n/2));
+      double H = exp(-(D*D)/(2*seuil*seuil));
+      imx[i*n+j]=imx[i*n+j]*H;
+      imy[i*n+j]=imy[i*n+j]*H;
+    }
+  }
+  decal_origine(imx,n);
+  decal_origine(imy,n);
+
+  /* creation du spectre affichable*/
+  module(imx,imy,n*n,immod);
+  decal_origine(immod,n);
+
+  /* ecriture dans une image */
+  im2 = new unsigned char [n*n];
+
+  max=0; /* variable de remise a l'echelle*/
+  for (i=0;i<n*n;i++)
+    if ( immod[i] > max) max=immod[i];
+
+  for (i=0;i<n;i++){
+    for(j=0;j<n;j++){
+      val_double = log(1+ immod[n*i+j]) / log(1+max) * 255 ;
+      im2[i*n+j]  = (unsigned char) (val_double);
+    }
+  }
+ 
+  /* sauvegarde dans un fichier */
+  printf("\n Sauvegardez l'image de la FFT sous fft-im.pgm ");
+  strcpy(fileName, "fft_im.pgm");
+  writePGM_Picture(fileName, im2, n, n);
+ 
+  /* calcul de la FFT inverse */
+  fft_2D_inv(imx,imy,n);
+
+  /* ecriture dans une image */
+  for (i=0;i<n;i++){
+    for(j=0;j<n;j++){
+      im2[i*n+j]  = (unsigned char) (imx[n*i+j]);
+    }
+  }
+  /* sauvegarde dans un fichier */
+  printf("\n Sauvegardez l'image de la FFT inverse sous fft-im-inv.pgm ");  
+  strcpy(fileName, "fft_im_inv.pgm");
+  writePGM_Picture(fileName, im2, n, n);
+
+  delete [] imx;
+  delete [] imy;
+  delete [] immod;
+
+  delete [] im1;
+  delete [] im2;
+
+}
+
+/************** FIN FFT_IM_filtre_Gaussien *************************************************/
+
+/************** FIN FFT_IM_filtre_Gaussien *************************************************/
+
+/******************* procedure FFT_IM_filtre_Gaussien  ***************************************
+
+  - lit une image au format pgm.
+  - calcule sa fft2d ainsi que son module.
+  - filtre selon un filtre Gaussien  
+  - ecrit le module dans le fichier image fft-im.pgm (avec mise a l'echelle)
+  - calcule la fft imverse
+  - ecrit la fft inverse dans le fichier image  fft-im-inv.pgm
+
+    **************************************************************************/
+
+void FFT_IM_filtre_Gaussien_ani(double seuilx, double seuily)
+{   
+  double *imx,*imy,*immod;
+  unsigned char *im1,*im2;
+  int i,j;
+  int k;
+  double val_double;
+  double max;
+
+  /* lecture d'une image en format pgm */
+  char fileName[250];
+  strcpy(fileName, "./images/lena.pgm");
+  int n = 512 ;
+  im1 = new unsigned char [n*n];
+
+  printf("\n Ouverture de %s de taille [%d,%d]", fileName, n, n);
+  readPGM_Picture(fileName, im1, n, n);
+
+  /*initialisation des vecteurs d'entree reel et imaginaire*/
+  imx = new double[n*n];
+  imy = new double[n*n];
+  immod = new double[n*n];
+  for(i=0;i<n;i++){
+    for(j=0;j<n;j++){
+      k=n*i+j;
+      imx[k] = double (im1[k]);
+      imy[k] = 0.0;
+    }
+  }
+
+  /* calcul de la fft-2D */
+  fft_2D(imx,imy,n);
+
+  /* Application du filtre*/
+  decal_origine(imx,n);
+  decal_origine(imy,n);
+  for(i=0;i<n;i++){
+    for(j=0;j<n;j++){
+      int u = i-n/2;
+      int v = j-n/2;
+      double H = exp(-(u*u)/(2*seuilx*seuilx)) * exp(-(v*v)/(2*seuily*seuily));
+      imx[i*n+j]=imx[i*n+j]*H;
+      imy[i*n+j]=imy[i*n+j]*H;
+    }
+  }
+  decal_origine(imx,n);
+  decal_origine(imy,n);
+
+  /* creation du spectre affichable*/
+  module(imx,imy,n*n,immod);
+  decal_origine(immod,n);
+
+  /* ecriture dans une image */
+  im2 = new unsigned char [n*n];
+
+  max=0; /* variable de remise a l'echelle*/
+  for (i=0;i<n*n;i++)
+    if ( immod[i] > max) max=immod[i];
+
+  for (i=0;i<n;i++){
+    for(j=0;j<n;j++){
+      val_double = log(1+ immod[n*i+j]) / log(1+max) * 255 ;
+      im2[i*n+j]  = (unsigned char) (val_double);
+    }
+  }
+ 
+  /* sauvegarde dans un fichier */
+  printf("\n Sauvegardez l'image de la FFT sous fft-im.pgm ");
+  strcpy(fileName, "fft_im.pgm");
+  writePGM_Picture(fileName, im2, n, n);
+ 
+  /* calcul de la FFT inverse */
+  fft_2D_inv(imx,imy,n);
+
+  /* ecriture dans une image */
+  for (i=0;i<n;i++){
+    for(j=0;j<n;j++){
+      im2[i*n+j]  = (unsigned char) (imx[n*i+j]);
+    }
+  }
+  /* sauvegarde dans un fichier */
+  printf("\n Sauvegardez l'image de la FFT inverse sous fft-im-inv.pgm ");  
+  strcpy(fileName, "fft_im_inv.pgm");
+  writePGM_Picture(fileName, im2, n, n);
+
+  delete [] imx;
+  delete [] imy;
+  delete [] immod;
+
+  delete [] im1;
+  delete [] im2;
+
+}
+
+/************** FIN FFT_IM_filtre_Gaussien_ani *************************************************/

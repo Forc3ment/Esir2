@@ -4,8 +4,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <vector>
+#include <algorithm>
 #include "fft-a-prog.h"
-
 
 #define PI		3.141592653589793
 
@@ -84,6 +85,15 @@ void TEST2D();
     **************************************************************************/
 void FFT_IM();
 
+void FFT_IM_debruitee(int test);
+
+void FFT_IM_filtre_ideal(double seuil);
+
+void FFT_IM_filtre_Butterworth(double seuil, int ordre);
+
+void FFT_IM_filtre_Gaussien(double seuil);
+
+void FFT_IM_filtre_Gaussien_ani(double seuilx, double seuily);
 
 
 #endif /* #ifndef module_inclu */

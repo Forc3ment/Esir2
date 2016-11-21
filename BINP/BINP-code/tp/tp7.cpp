@@ -413,7 +413,7 @@ int main(int argc, char **argv)
  //    vpImageIo::write(IragrSimpleC,"../resultat/IragrSimpleC.jpg");
     
     
-    float alpha = PI/3;
+    float alpha = PI/6;
     int newHeight = floor( abs(I0.getHeight()*cos(alpha)) + abs(I0.getWidth()*sin(alpha)));
     int newWidth = floor( abs(I0.getHeight()*sin(alpha)) + abs(I0.getWidth()*cos(alpha)));	
 	/// Rotation Simple
